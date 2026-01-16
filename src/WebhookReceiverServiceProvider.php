@@ -34,9 +34,14 @@ class WebhookReceiverServiceProvider extends ServiceProvider
         // Load migrations
         $this->loadMigrationsFrom(__DIR__ . '/Database/Migrations');
 
-        // Load routes
-        $this->loadRoutesFrom(__DIR__ . '/../routes/api.php');
-        $this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
+        // Load routes with proper middleware
+        $this->app['router']->group([], function () {
+            $this->loadRoutesFrom(__DIR__ . '/../routes/api.php');
+        });
+
+        $this->app['router']->group(['middleware' => 'web'], function () {
+            $this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
+        });
 
         // Load views
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'webhook-receiver');
