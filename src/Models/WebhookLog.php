@@ -23,6 +23,7 @@ class WebhookLog extends Model
         'occurrence_count',
         'first_seen_at',
         'last_seen_at',
+        'viewed_at',
     ];
 
     protected $casts = [
@@ -31,6 +32,7 @@ class WebhookLog extends Model
         'datetime' => 'datetime',
         'first_seen_at' => 'datetime',
         'last_seen_at' => 'datetime',
+        'viewed_at' => 'datetime',
         'level' => 'integer',
         'occurrence_count' => 'integer',
     ];
@@ -80,5 +82,28 @@ class WebhookLog extends Model
     public function scopeOlderThan($query, int $days)
     {
         return $query->where('last_seen_at', '<', Carbon::now()->subDays($days));
+    }
+
+    public function scopeUnviewed($query)
+    {
+        return $query->whereNull('viewed_at');
+    }
+
+    public function scopeViewed($query)
+    {
+        return $query->whereNotNull('viewed_at');
+    }
+
+    public function markAsViewed(): void
+    {
+        if (!$this->viewed_at) {
+            $this->viewed_at = Carbon::now();
+            $this->save();
+        }
+    }
+
+    public function isViewed(): bool
+    {
+        return $this->viewed_at !== null;
     }
 }
